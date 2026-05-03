@@ -109,10 +109,12 @@ Notes:
 - On Linux, the packaged app keeps its console attached so startup errors are visible instead of failing silently.
 - On Linux, PyInstaller needs a Python interpreter built with shared `libpython` and a working `tkinter` install. The script will automatically prefer a compatible interpreter such as `/usr/bin/python3`.
 - If PyInstaller is not installed into that interpreter, the script will use `pipx` automatically when available.
+- The GitHub Actions artifacts are built on Ubuntu 22.04 runners to keep the glibc requirement lower than Ubuntu 24.04-based builds.
 - The packaged GUI still depends on the Linux HID gadget setup. You must run `setup_hid_gadget.sh` first so `/dev/hidg0` exists.
 - The packaged GUI still requires a graphical desktop session. It will not start from a plain headless shell unless you provide X11 forwarding or a virtual display such as `Xvfb`.
 - If your user cannot open `/dev/hidg0`, either install the udev rule or run the executable with `sudo`.
-- A GitHub Actions workflow at `.github/workflows/build-executable.yml` builds and smoke-tests a Linux artifact, then uploads it as `linux-hid-mouse-linux-x86_64.tar.gz` so the executable bit is preserved.
+- A GitHub Actions workflow at `.github/workflows/build-executable.yml` builds and smoke-tests separate Linux artifacts for `x86_64` and `arm64`, then uploads them as `.tar.gz` files so the executable bit is preserved.
+- If your target machine is `armv7` / 32-bit Raspberry Pi OS, the GitHub artifacts still will not run there. Build the executable locally on that device with `./build_executable.sh` instead.
 
 ---
 
@@ -213,7 +215,9 @@ Each mouse action is encoded as a **4-byte HID report**:
 
 **The executable does not start**
 
-- Extract `linux-hid-mouse-linux-x86_64.tar.gz` first, then run the contained `linux-hid-mouse` file.
+- Download the artifact that matches your CPU architecture, extract its `.tar.gz`, then run the contained `linux-hid-mouse` file.
+- If you downloaded an older artifact built before this compatibility change, discard it and download a fresh one from the latest workflow run.
+- The current workflow publishes `x86_64` and `arm64` builds. A 32-bit ARM system needs a local build.
 - Start it from a local graphical desktop session. If you run it from a headless shell, it will exit with a display error.
 - If it still fails, run the executable from a terminal and check the printed error message.
 
