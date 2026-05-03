@@ -8,16 +8,7 @@ on:
 
 jobs:
   build-linux-executable:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: x86_64
-            runner: ubuntu-22.04
-          - arch: arm64
-            runner: ubuntu-22.04-arm
-
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Check out repository
@@ -49,11 +40,11 @@ jobs:
 
       - name: Package executable artifact
         run: |
-          tar -C dist -czf linux-hid-mouse-linux-${{ matrix.arch }}.tar.gz linux-hid-mouse
+          tar -C dist -czf linux-hid-mouse-linux-x86_64.tar.gz linux-hid-mouse
 
       - name: Upload executable artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-hid-mouse-${{ matrix.arch }}
-          path: linux-hid-mouse-linux-${{ matrix.arch }}.tar.gz
+          name: linux-hid-mouse-x86_64
+          path: linux-hid-mouse-linux-x86_64.tar.gz
           if-no-files-found: error
