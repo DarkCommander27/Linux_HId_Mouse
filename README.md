@@ -105,11 +105,12 @@ The executable will be written to `dist/linux-hid-mouse`.
 
 Notes:
 - Build on the same OS family you plan to run on. PyInstaller does not cross-compile between Linux, macOS, and Windows.
+- On Linux, the packaged app keeps its console attached so startup errors are visible instead of failing silently.
 - On Linux, PyInstaller needs a Python interpreter built with shared `libpython` and a working `tkinter` install. The script will automatically prefer a compatible interpreter such as `/usr/bin/python3`.
 - If PyInstaller is not installed into that interpreter, the script will use `pipx` automatically when available.
 - The packaged GUI still depends on the Linux HID gadget setup. You must run `setup_hid_gadget.sh` first so `/dev/hidg0` exists.
 - If your user cannot open `/dev/hidg0`, either install the udev rule or run the executable with `sudo`.
-- A GitHub Actions workflow at `.github/workflows/build-executable.yml` can build the Linux executable artifact on GitHub-hosted Ubuntu runners.
+- A GitHub Actions workflow at `.github/workflows/build-executable.yml` builds and smoke-tests a Linux artifact, then uploads it as `linux-hid-mouse-linux-x86_64.tar.gz` so the executable bit is preserved.
 
 ---
 

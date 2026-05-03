@@ -8,6 +8,15 @@ PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_NAME="linux-hid-mouse"
 DIST_DIR="$PROJECT_DIR/dist"
 BUILD_DIR="$PROJECT_DIR/build/pyinstaller"
+PYINSTALLER_ARGS=(
+    --noconfirm
+    --clean
+    --onefile
+    --distpath "$DIST_DIR"
+    --workpath "$BUILD_DIR"
+    --specpath "$BUILD_DIR"
+    --name "$APP_NAME"
+)
 
 has_shared_python() {
     local candidate="$1"
@@ -77,16 +86,11 @@ fi
 
 mkdir -p "$BUILD_DIR" "$DIST_DIR"
 
-"${PYINSTALLER_CMD[@]}" \
-    --noconfirm \
-    --clean \
-    --onefile \
-    --windowed \
-    --distpath "$DIST_DIR" \
-    --workpath "$BUILD_DIR" \
-    --specpath "$BUILD_DIR" \
-    --name "$APP_NAME" \
-    hid_mouse_gui.py
+if [ "$(uname -s)" != "Linux" ]; then
+    PYINSTALLER_ARGS+=(--windowed)
+fi
+
+"${PYINSTALLER_CMD[@]}" "${PYINSTALLER_ARGS[@]}" hid_mouse_gui.py
 
 echo "[INFO] Built with: $BUILD_PYTHON"
 echo "[INFO] Build complete: $PROJECT_DIR/dist/$APP_NAME"
