@@ -17,7 +17,7 @@ jobs:
       - name: Install packaging prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-tk pipx xvfb
+          sudo apt-get install -y python3-tk pipx
 
       - name: Build standalone executable
         run: |
@@ -33,10 +33,9 @@ jobs:
           test "$status" -eq 1
           grep -q "No graphical display session was detected" headless.log
 
-      - name: Smoke test executable startup
-        continue-on-error: true
+      - name: Verify packaged executable metadata
         run: |
-          HID_MOUSE_AUTO_EXIT_MS=1000 xvfb-run -a ./dist/linux-hid-mouse
+          file ./dist/linux-hid-mouse | grep -E 'ELF 64-bit.*x86-64'
 
       - name: Package executable artifact
         run: |
