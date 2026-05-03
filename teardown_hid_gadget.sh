@@ -7,6 +7,7 @@
 #   sudo ./teardown_hid_gadget.sh
 
 set -e
+shopt -s nullglob
 
 GADGET_NAME="hid_mouse"
 CONFIGFS_HOME="/sys/kernel/config"
@@ -30,29 +31,38 @@ echo "" > UDC 2>/dev/null || true
 
 # Remove function symlinks from all configs
 info "Removing configuration links..."
-for cfg in configs/*/; do
-    for link in "$cfg"*/; do
+for cfg in configs/*; do
+    [ -d "$cfg" ] || continue
+    for link in "$cfg"/*; do
         [ -L "$link" ] && rm -f "$link"
     done
 done
 
 # Remove configuration string directories then config directories
-for cfg_str in configs/*/strings/*/; do
+for cfg_str in configs/*/strings/*; do
     [ -d "$cfg_str" ] && rmdir "$cfg_str"
 done
-for cfg in configs/*/; do
+for cfg_strings in configs/*/strings; do
+    [ -d "$cfg_strings" ] && rmdir "$cfg_strings"
+done
+for cfg in configs/*; do
     [ -d "$cfg" ] && rmdir "$cfg"
 done
 
 # Remove functions
 info "Removing HID function..."
-for fn in functions/*/; do
+for fn in functions/*; do
     [ -d "$fn" ] && rmdir "$fn"
 done
 
 # Remove string descriptors
-for str in strings/*/; do
+for str in strings/*; do
     [ -d "$str" ] && rmdir "$str"
+done
+
+# Remove top-level directories created by setup
+for dir in configs functions strings; do
+    [ -d "$dir" ] && rmdir "$dir"
 done
 
 # Remove gadget directory

@@ -1,0 +1,32 @@
+name: Build Executable
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-linux-executable:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install packaging prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk pipx
+
+      - name: Build standalone executable
+        run: |
+          chmod +x build_executable.sh
+          ./build_executable.sh
+
+      - name: Upload executable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-hid-mouse
+          path: dist/linux-hid-mouse
+          if-no-files-found: error

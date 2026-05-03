@@ -13,6 +13,7 @@ build/
 .venv/
 venv/
 env/
+.build-venv-test/
 
 # Editor / OS
 .DS_Store

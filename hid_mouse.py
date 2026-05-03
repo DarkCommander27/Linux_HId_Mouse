@@ -134,6 +134,7 @@ class HIDMouse:
             return True
         except OSError as exc:
             print(f"[HIDMouse] Write error: {exc}")
+            self.close()
             return False
 
     # ---------------------------------------------------------------------- #
@@ -154,16 +155,17 @@ class HIDMouse:
         mask = _BUTTON_MAP.get(button.lower())
         if mask is None:
             raise ValueError(f"Unknown button: {button!r}. Use 'left', 'right', or 'middle'.")
-        ok = self.send_report(buttons=mask)
+        ok_press = self.send_report(buttons=mask)
         time.sleep(hold_seconds)
-        self.send_report(buttons=0)
-        return ok
+        ok_release = self.send_report(buttons=0)
+        return ok_press and ok_release
 
-    def double_click(self, button: str = "left") -> None:
+    def double_click(self, button: str = "left") -> bool:
         """Perform a double-click."""
-        self.click(button)
+        ok_first = self.click(button)
         time.sleep(0.05)
-        self.click(button)
+        ok_second = self.click(button)
+        return ok_first and ok_second
 
     def scroll(self, ticks: int) -> bool:
         """Scroll the mouse wheel.

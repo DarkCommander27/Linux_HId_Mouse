@@ -145,7 +145,7 @@ if [ -z "$UDC" ]; then
 fi
 
 info "Binding gadget to UDC: $UDC"
-echo "$UDC" > UDC
+echo "$UDC" > UDC || error "Failed to bind gadget to UDC: $UDC"
 
 info "Done! HID mouse gadget is active."
 info "HID device node: /dev/hidg0"

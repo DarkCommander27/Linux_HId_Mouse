@@ -19,6 +19,7 @@ import sys
 import threading
 import time
 import tkinter as tk
+from typing import Optional
 from tkinter import messagebox
 
 # Allow running from any working directory
@@ -69,7 +70,7 @@ class HIDMouseGUI:
         self._connected = False
         self._move_speed = tk.IntVar(value=10)
         self._moving = False
-        self._move_thread: threading.Thread | None = None
+        self._move_thread: Optional[threading.Thread] = None
 
         self._build_ui()
         self._try_connect()
@@ -355,6 +356,25 @@ class HIDMouseGUI:
             self._status_lbl.configure(fg=FG_ERR)
             self._conn_btn.configure(text="Connect", bg=BG_ACCENT, activebackground="#6d28d9")
 
+    def _handle_device_failure(self) -> None:
+        if not self._connected:
+            return
+        self._stop_move()
+        self.mouse.close()
+        self._set_connected(False)
+        messagebox.showerror(
+            "Device Disconnected",
+            "The HID device is no longer writable.\n\n"
+            "Reconnect the USB gadget and press Connect again.",
+        )
+
+    def _run_async_action(self, action) -> None:
+        def _worker() -> None:
+            if not action():
+                self.root.after(0, self._handle_device_failure)
+
+        threading.Thread(target=_worker, daemon=True).start()
+
     # ---------------------------------------------------------------------- #
     # Movement helpers
     # ---------------------------------------------------------------------- #
@@ -376,8 +396,8 @@ class HIDMouseGUI:
         self._moving = False
 
     def _send_move(self, x: int, y: int) -> None:
-        if self._connected:
-            self.mouse.move(x, y)
+        if self._connected and not self.mouse.move(x, y):
+            self.root.after(0, self._handle_device_failure)
 
     # ---------------------------------------------------------------------- #
     # Button / scroll helpers
@@ -385,19 +405,15 @@ class HIDMouseGUI:
 
     def _click(self, button: str) -> None:
         if self._connected:
-            threading.Thread(
-                target=self.mouse.click, args=(button,), daemon=True
-            ).start()
+            self._run_async_action(lambda: self.mouse.click(button))
 
     def _double_click(self, button: str) -> None:
         if self._connected:
-            threading.Thread(
-                target=self.mouse.double_click, args=(button,), daemon=True
-            ).start()
+            self._run_async_action(lambda: self.mouse.double_click(button))
 
     def _scroll(self, ticks: int) -> None:
-        if self._connected:
-            self.mouse.scroll(ticks)
+        if self._connected and not self.mouse.scroll(ticks):
+            self._handle_device_failure()
 
     # ---------------------------------------------------------------------- #
     # Clean shutdown
