@@ -447,11 +447,27 @@ def _section_label(parent: tk.Widget, text: str) -> None:
 # Entry point
 # --------------------------------------------------------------------------- #
 
-def main() -> None:
-    root = tk.Tk()
+def main() -> int:
+    if sys.platform.startswith("linux"):
+        has_display = bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+        if not has_display:
+            print(
+                "[ERROR] No graphical display session was detected.\n"
+                "Run linux-hid-mouse from a local desktop session, or launch it\n"
+                "over X11 forwarding / Xvfb if you are working headlessly."
+            )
+            return 1
+
+    try:
+        root = tk.Tk()
+    except tk.TclError as exc:
+        print(f"[ERROR] Failed to initialize the GUI: {exc}")
+        return 1
+
     HIDMouseGUI(root)
     root.mainloop()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

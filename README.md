@@ -23,6 +23,7 @@ the Linux device.
 | **Linux kernel** | `CONFIG_USB_GADGET`, `CONFIG_USB_CONFIGFS`, `CONFIG_USB_F_HID` (built-in or as modules) |
 | **UDC driver** | `dwc3`, `musb`, `chipidea`, or similar – depends on your hardware |
 | **Python** | 3.8 or later (only the standard library is used) |
+| **Desktop session** | Required for `hid_mouse_gui.py` and the packaged executable (`DISPLAY`/Wayland with Xwayland) |
 | **Root access** | Required for `setup_hid_gadget.sh` and `teardown_hid_gadget.sh` |
 
 ### Tested hardware
@@ -109,6 +110,7 @@ Notes:
 - On Linux, PyInstaller needs a Python interpreter built with shared `libpython` and a working `tkinter` install. The script will automatically prefer a compatible interpreter such as `/usr/bin/python3`.
 - If PyInstaller is not installed into that interpreter, the script will use `pipx` automatically when available.
 - The packaged GUI still depends on the Linux HID gadget setup. You must run `setup_hid_gadget.sh` first so `/dev/hidg0` exists.
+- The packaged GUI still requires a graphical desktop session. It will not start from a plain headless shell unless you provide X11 forwarding or a virtual display such as `Xvfb`.
 - If your user cannot open `/dev/hidg0`, either install the udev rule or run the executable with `sudo`.
 - A GitHub Actions workflow at `.github/workflows/build-executable.yml` builds and smoke-tests a Linux artifact, then uploads it as `linux-hid-mouse-linux-x86_64.tar.gz` so the executable bit is preserved.
 
@@ -208,6 +210,12 @@ Each mouse action is encoded as a **4-byte HID report**:
 - Unplug and re-plug the cable after running `setup_hid_gadget.sh`.
 - Some hosts need a moment to enumerate. Check Device Manager (Windows)
   or `lsusb` (Linux) on the host side.
+
+**The executable does not start**
+
+- Extract `linux-hid-mouse-linux-x86_64.tar.gz` first, then run the contained `linux-hid-mouse` file.
+- Start it from a local graphical desktop session. If you run it from a headless shell, it will exit with a display error.
+- If it still fails, run the executable from a terminal and check the printed error message.
 
 ---
 

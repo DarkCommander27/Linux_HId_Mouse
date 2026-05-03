@@ -24,6 +24,15 @@ jobs:
           chmod +x build_executable.sh
           ./build_executable.sh
 
+      - name: Verify headless error message
+        run: |
+          set +e
+          ./dist/linux-hid-mouse > headless.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          grep -q "No graphical display session was detected" headless.log
+
       - name: Smoke test executable startup
         run: |
           timeout 5 xvfb-run -a ./dist/linux-hid-mouse || test $? -eq 124
