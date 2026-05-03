@@ -1,0 +1,12 @@
+# /etc/udev/rules.d/99-hid-mouse.rules
+#
+# Grants members of the "input" group read/write access to the USB HID gadget
+# device node (/dev/hidg0) that is created by setup_hid_gadget.sh.
+#
+# Installation:
+#   sudo cp udev/99-hid-mouse.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules
+#   sudo udevadm trigger
+#   sudo usermod -aG input $USER   # log out and back in for this to take effect
+#
+SUBSYSTEM=="hidg", KERNEL=="hidg[0-9]*", GROUP="input", MODE="0660"
