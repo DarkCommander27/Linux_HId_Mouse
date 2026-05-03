@@ -44,7 +44,7 @@ jobs:
 
       - name: Smoke test executable startup
         run: |
-          timeout 5 xvfb-run -a ./dist/linux-hid-mouse || test $? -eq 124
+          HID_MOUSE_AUTO_EXIT_MS=1000 xvfb-run -a ./dist/linux-hid-mouse
 
       - name: Package executable artifact
         run: |

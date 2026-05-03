@@ -448,6 +448,8 @@ def _section_label(parent: tk.Widget, text: str) -> None:
 # --------------------------------------------------------------------------- #
 
 def main() -> int:
+    auto_exit_ms = os.environ.get("HID_MOUSE_AUTO_EXIT_MS")
+
     if sys.platform.startswith("linux"):
         has_display = bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
         if not has_display:
@@ -465,6 +467,16 @@ def main() -> int:
         return 1
 
     HIDMouseGUI(root)
+
+    if auto_exit_ms:
+        try:
+            delay_ms = max(1, int(auto_exit_ms))
+        except ValueError:
+            print(f"[ERROR] Invalid HID_MOUSE_AUTO_EXIT_MS value: {auto_exit_ms!r}")
+            root.destroy()
+            return 1
+        root.after(delay_ms, root.destroy)
+
     root.mainloop()
     return 0
 
